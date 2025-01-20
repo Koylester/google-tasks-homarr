@@ -9,19 +9,20 @@
     <h2>Mes Tâches</h2>
     <ul id="task-list"></ul>
 
-    <script>
-        async function fetchTasks() {
-            const response = await fetch(
-                'https://www.googleapis.com/tasks/v1/lists/@default/tasks?key=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'
-            );
-            const data = await response.json();
-            const list = document.getElementById('task-list');
-            data.items.forEach(task => {
-                const item = document.createElement('li');
-                item.textContent = task.title;
-                list.appendChild(item);
-            });
-        }
+<script>
+    async function fetchTasks() {
+        const apiKey = localStorage.getItem('GOOGLE_API_KEY'); // Charger dynamiquement la clé
+        const response = await fetch(
+            `https://www.googleapis.com/tasks/v1/lists/@default/tasks?key=${apiKey}`
+        );
+        const data = await response.json();
+        const list = document.getElementById('task-list');
+        data.items.forEach(task => {
+            const item = document.createElement('li');
+            item.textContent = task.title;
+            list.appendChild(item);
+        });
+    }
 // Actualisation automatique toutes les 30 secondes
     setInterval(fetchTasks, 30000);
         
