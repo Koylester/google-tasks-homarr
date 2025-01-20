@@ -4,82 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Tâches Google</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #f4f4f4;
-            color: #333;
-            text-align: center;
+            font-family: 'Roboto', sans-serif;
+            background-color: #202124;
+            color: #e8eaed;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+
+        .task-container {
+            background-color: #303134;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         h2 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #4CAF50;
-            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 400;
+            margin: 0 0 15px 0;
         }
 
-        input, button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .task-item {
+            display: flex;
+            align-items: center;
+            background: #3c4043;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .task-item:hover {
+            background: #5f6368;
+        }
+
+        .task-item input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .task-item span {
+            flex: 1;
             font-size: 16px;
         }
 
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s ease;
-        }
-
-        button:hover {
-            background: #45a049;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        ul li {
-            background: #f9f9f9;
-            padding: 15px;
-            margin: 5px 0;
-            border-left: 5px solid #4CAF50;
-            border-radius: 5px;
-            text-align: left;
-            font-size: 18px;
-        }
-
         .loading {
-            color: #888;
-            font-style: italic;
+            text-align: center;
+            font-size: 14px;
+            color: #bdc1c6;
+        }
+
+        .completed-tasks {
+            font-size: 14px;
+            color: #8ab4f8;
+            cursor: pointer;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>📋 Mes Tâches Google</h2>
-        <button onclick="fetchTasks()">Charger les Tâches</button>
-        <ul id="task-list">
-            <li class="loading">Cliquez sur le bouton pour charger vos tâches...</li>
-        </ul>
+    <div class="task-container">
+        <h2>📋 Mes tâches</h2>
+        <div id="task-list">
+            <p class="loading">Chargement des tâches...</p>
+        </div>
+        <div class="completed-tasks">Tâches terminées (51)</div>
     </div>
 
     <script>
@@ -87,8 +86,9 @@
         const TASKS_API_URL = "https://www.googleapis.com/tasks/v1/lists/@default/tasks";
 
         async function fetchTasks() {
-            document.getElementById('task-list').innerHTML = '<li class="loading">Chargement des tâches...</li>';
-            
+            const taskListElement = document.getElementById('task-list');
+            taskListElement.innerHTML = '<p class="loading">Chargement des tâches...</p>';
+
             try {
                 const response = await fetch(TASKS_API_URL, {
                     method: 'GET',
@@ -103,24 +103,36 @@
                 }
 
                 const data = await response.json();
-                const list = document.getElementById("task-list");
-                list.innerHTML = '';
+                taskListElement.innerHTML = '';
 
                 if (data.items && data.items.length > 0) {
                     data.items.forEach(task => {
-                        let li = document.createElement("li");
-                        li.textContent = task.title;
-                        list.appendChild(li);
+                        let taskItem = document.createElement("div");
+                        taskItem.className = "task-item";
+
+                        let checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.checked = task.status === "completed";
+
+                        let taskText = document.createElement("span");
+                        taskText.textContent = task.title;
+
+                        taskItem.appendChild(checkbox);
+                        taskItem.appendChild(taskText);
+                        taskListElement.appendChild(taskItem);
                     });
                 } else {
-                    list.innerHTML = '<li>Aucune tâche trouvée.</li>';
+                    taskListElement.innerHTML = '<p class="loading">Aucune tâche trouvée.</p>';
                 }
 
             } catch (error) {
                 console.error("Erreur lors de la récupération des tâches :", error);
-                document.getElementById("task-list").innerHTML = '<li>Erreur lors de la récupération des tâches.</li>';
+                taskListElement.innerHTML = '<p class="loading">Erreur lors du chargement des tâches.</p>';
             }
         }
+
+        // Charger les tâches automatiquement au chargement de la page
+        fetchTasks();
     </script>
 </body>
 </html>
