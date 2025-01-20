@@ -1,32 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Tasks</title>
+    <title>Google Tasks OAuth</title>
 </head>
 <body>
-    <h2>Mes Tâches</h2>
+    <h2>Mes Tâches Google</h2>
+    <button onclick="signIn()">Se connecter avec Google</button>
     <ul id="task-list"></ul>
 
-<script>
-    async function fetchTasks() {
-        const apiKey = localStorage.getItem('GOOGLE_API_KEY'); // Charger dynamiquement la clé
-        const response = await fetch(
-            `https://www.googleapis.com/tasks/v1/lists/@default/tasks?key=${apiKey}`
-        );
-        const data = await response.json();
-        const list = document.getElementById('task-list');
-        data.items.forEach(task => {
-            const item = document.createElement('li');
-            item.textContent = task.title;
-            list.appendChild(item);
-        });
-    }
-// Actualisation automatique toutes les 30 secondes
-    setInterval(fetchTasks, 30000);
-        
-        fetchTasks();
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        const CLIENT_ID = "245399450077-tcu2bsvndb3ivegklacokn14k6unpde9.apps.googleusercontent.com";
+        const SCOPES = "https://www.googleapis.com/auth/tasks.readonly";
+
+        function signIn() {
+            gapi.load('client:auth2', () => {
+                gapi.auth2.init({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES
+                }).then(() => {
+                    gapi.auth2.getAuthInstance().signIn().then(() => {
+                        fetchTasks();
+                    });
+                });
+            });
+        }
+
+        async function fetchTasks() {
+            await gapi.client.load("tasks", "v1");
+            const response = await gapi.client.tasks.tasks.list({
+                tasklist: '@default'
+            });
+            const tasks = response.result.items;
+            const list = document.getElementById("task-list");
+            list.innerHTML = '';
+            tasks.forEach(task => {
+                let li = document.createElement("li");
+                li.textContent = task.title;
+                list.appendChild(li);
+            });
+        }
     </script>
 </body>
 </html>
