@@ -22,6 +22,9 @@
                 list.appendChild(item);
             });
         }
+// Actualisation automatique toutes les 30 secondes
+    setInterval(fetchTasks, 30000);
+        
         fetchTasks();
     </script>
 </body>
