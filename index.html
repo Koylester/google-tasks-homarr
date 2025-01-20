@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Tasks</title>
+</head>
+<body>
+    <h2>Mes Tâches</h2>
+    <ul id="task-list"></ul>
+
+    <script>
+        async function fetchTasks() {
+            const response = await fetch(
+                'https://www.googleapis.com/tasks/v1/lists/@default/tasks?key=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'
+            );
+            const data = await response.json();
+            const list = document.getElementById('task-list');
+            data.items.forEach(task => {
+                const item = document.createElement('li');
+                item.textContent = task.title;
+                list.appendChild(item);
+            });
+        }
+        fetchTasks();
+    </script>
+</body>
+</html>
