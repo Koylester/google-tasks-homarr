@@ -3,47 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Tasks OAuth</title>
+    <title>Google Tasks Affichage</title>
 </head>
 <body>
-    <h2>Mes Tâches Google</h2>
-    <button onclick="signIn()">Se connecter avec Google</button>
+    <h2>Liste des Tâches</h2>
     <ul id="task-list"></ul>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js"></script>
     <script>
-        const CLIENT_ID = "245399450077-tcu2bsvndb3ivegklacokn14k6unpde9.apps.googleusercontent.com";
-        const SCOPES = "https://www.googleapis.com/auth/tasks.readonly";
-
-        function signIn() {
-            gapi.load('client:auth2', () => {
-                gapi.auth2.init({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    cookiepolicy: 'single_host_origin'
-                }).then(() => {
-                    gapi.auth2.getAuthInstance().signIn().then(() => {
-                        fetchTasks();
-                    });
-                });
-            });
-        }
+        // Informations d'authentification OAuth
+        const ACCESS_TOKEN = "ya29.a0ARW5m7754rD_gtr3e9bkBvIsLBAruqZ7nlWapDqonvB5H75td3hpYImTqRqNjqggVNi3T3kDrRD7Sr7JlJRpJvMb5facu_UZzhEqAAALfi9fwsR4YZFoNfpdQoHSsnhjnpLR511aD1GwZ9-aF9kvzoxwFSFjZCcHxyfIHbIyaCgYKASQSARMSFQHGX2MiwhqcbOBAA3QtNniXNtn07A0175";
+        const TASKS_API_URL = "https://www.googleapis.com/tasks/v1/lists/@default/tasks";
 
         async function fetchTasks() {
-            await gapi.client.load("tasks", "v1");
-            const response = await gapi.client.tasks.tasks.list({
-                tasklist: '@default'
-            });
-            const tasks = response.result.items;
-            const list = document.getElementById("task-list");
-            list.innerHTML = '';
-            tasks.forEach(task => {
-                let li = document.createElement("li");
-                li.textContent = task.title;
-                list.appendChild(li);
-            });
+            try {
+                const response = await fetch(TASKS_API_URL, {
+                    method: 'GET',
+                    headers: {
+                        "Authorization": `Bearer ${ACCESS_TOKEN}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
+                }
+
+                const data = await response.json();
+                const list = document.getElementById("task-list");
+                list.innerHTML = '';
+
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach(task => {
+                        let li = document.createElement("li");
+                        li.textContent = task.title;
+                        list.appendChild(li);
+                    });
+                } else {
+                    list.innerHTML = '<li>Aucune tâche trouvée.</li>';
+                }
+
+            } catch (error) {
+                console.error("Erreur lors de la récupération des tâches :", error);
+                document.getElementById("task-list").innerHTML = '<li>Erreur lors de la récupération des tâches.</li>';
+            }
         }
+
+        fetchTasks();
     </script>
 </body>
 </html>
